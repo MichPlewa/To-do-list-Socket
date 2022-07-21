@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 import shortid from 'shortid';
 
 const App = () => {
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState('');
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   useEffect(() => {
-    setSocket(io('http://localhost:8000'));
+    const socket = io('http://localhost:8000');
+    setSocket(socket);
+    socket.on('addTask', (task) => addTask(task));
+    socket.on('removeTask', (id) => removeTask(id));
+    socket.on('updataData', (allTasks) => updataData(allTasks));
   }, []);
 
   const submitForm = (e) => {
@@ -17,6 +21,8 @@ const App = () => {
     socket.emit('addTask', { name: taskName, id });
     setTaskName('');
   };
+
+  const updataData = (allTasks) => setTasks(allTasks);
 
   const addTask = (task) => {
     setTasks((tasks) => [...tasks, task]);

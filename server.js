@@ -1,12 +1,18 @@
 const express = require('express');
 const socket = require('socket.io');
+// const cors = require('cors');
 
 const app = express();
+// app.use(cors());
 
 const tasks = [];
 
 const server = app.listen(process.env.PORT || 8000, () => {
   console.log('Server is running on port: 8000');
+});
+
+app.use((req, res) => {
+  res.status(404).send({ message: 'Error 404' });
 });
 
 io = socket(server);
@@ -27,8 +33,4 @@ io.on('connection', (socket) => {
 
     io.boadcast.emit('removeTask', tasks);
   });
-});
-
-app.use((req, res) => {
-  res.status(404).send({ message: 'Error 404' });
 });
