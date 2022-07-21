@@ -69,7 +69,7 @@ const App = () => {
         >
           <input
             className="text-input"
-            autocomplete="off"
+            autoComplete="off"
             type="text"
             placeholder="Type your description"
             id="task-name"
