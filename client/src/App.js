@@ -1,4 +1,34 @@
+import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+import shortid from 'shortid';
+
 const App = () => {
+  const [socket, setSocket] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [taskName, setTaskName] = useState('');
+  useEffect(() => {
+    setSocket(io('http://localhost:8000'));
+  }, []);
+
+  const submitForm = (e) => {
+    e.preventDefault();
+    const id = shortid();
+    addTask({ name: taskName, id });
+    socket.emit('addTask', { name: taskName, id });
+    setTaskName('');
+  };
+
+  const addTask = (task) => {
+    setTasks((tasks) => [...tasks, task]);
+  };
+
+  const removeTask = (id, isLocal) => {
+    setTasks((tasks) => tasks.filter((item) => item.id !== id));
+    if (isLocal) {
+      socket.emit('removeTask', id);
+    }
+  };
+
   return (
     <div className="App">
       <header>
@@ -9,21 +39,38 @@ const App = () => {
         <h2>Tasks</h2>
 
         <ul className="tasks-section__list" id="tasks-list">
-          <li className="task">
-            Shopping <button className="btn btn--red">Remove</button>
-          </li>
-          <li className="task">
-            Go out with a dog <button className="btn btn--red">Remove</button>
-          </li>
+          {tasks.map((item) => (
+            <li key={item.id} className="tasks">
+              {item.name}
+              {'  '}
+              <button
+                className="btn btn--red"
+                onClick={() => {
+                  removeTask(item.id, true);
+                }}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
         </ul>
 
-        <form id="add-task-form">
+        <form
+          id="add-task-form"
+          onSubmit={(e) => {
+            submitForm(e);
+          }}
+        >
           <input
             className="text-input"
             autocomplete="off"
             type="text"
             placeholder="Type your description"
             id="task-name"
+            value={taskName}
+            onChange={(e) => {
+              setTaskName(e.target.value);
+            }}
           />
           <button className="btn" type="submit">
             Add
