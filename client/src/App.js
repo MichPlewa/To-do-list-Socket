@@ -7,12 +7,16 @@ const App = () => {
   const [tasks, setTasks] = useState([]);
   const [taskName, setTaskName] = useState('');
   useEffect(() => {
-    const socket = io('http://localhost:8000');
+    const socket = io('ws://localhost:8000', { transports: ['websocket'] });
     setSocket(socket);
+    console.log('effect');
     socket.on('addTask', (task) => addTask(task));
     socket.on('removeTask', (id) => removeTask(id));
-    socket.on('updataData', (allTasks) => updataData(allTasks));
-  }, []);
+    socket.on('updataData', (allTasks) => {
+      console.log('appdata');
+      updataData(allTasks);
+    });
+  }, [io]);
 
   const submitForm = (e) => {
     e.preventDefault();
@@ -29,8 +33,16 @@ const App = () => {
   };
 
   const removeTask = (id, isLocal) => {
-    setTasks((tasks) => tasks.filter((item) => item.id !== id));
+    setTasks((tasks) =>
+      tasks.filter((item) => {
+        console.log(item, id);
+        return item.id !== id;
+      })
+    );
+    console.log('funkca do usunięcia', tasks);
+    console.log('usunięte', isLocal);
     if (isLocal) {
+      console.log('local', id);
       socket.emit('removeTask', id);
     }
   };

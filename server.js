@@ -18,19 +18,12 @@ app.use((req, res) => {
 io = socket(server);
 io.on('connection', (socket) => {
   console.log('Hi, new connection with id:', socket.id);
+  socket.to(socket.id).emit('updateData', tasks);
 
-  io.to(socket.id).emit('updateData', tasks);
-
-  io.on('addTask', (task) => {
+  socket.on('addTask', (task) => {
     tasks.push(task);
-    io.boadcast.emit('addTask', tasks);
+    socket.broadcast.emit('addTask', task);
   });
 
-  io.on('removeTask', (id) => {
-    tasks.filter((item) => {
-      item.id !== id;
-    });
-
-    io.boadcast.emit('removeTask', tasks);
-  });
+  socket.on('removeTask', (id) => socket.broadcast.emit('removeTask', id));
 });
