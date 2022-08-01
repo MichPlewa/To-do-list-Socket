@@ -15,10 +15,10 @@ app.use((req, res) => {
   res.status(404).send({ message: 'Error 404' });
 });
 
-io = socket(server);
+const io = socket(server);
 io.on('connection', (socket) => {
   console.log('Hi, new connection with id:', socket.id);
-  socket.to(socket.id).emit('updateData', tasks);
+  io.to(socket.id).emit('updataData', tasks);
 
   socket.on('addTask', (task) => {
     tasks.push(task);
